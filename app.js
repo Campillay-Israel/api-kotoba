@@ -20,9 +20,11 @@ app.get("/", (req, res) => {
   res.json({ data: "hola" });
 });
 
-// Crear cuenta
+// Crear cuenta posible
 app.post("/create-account", async (req, res) => {
   const { fullName, email, password } = req.body;
+
+
 
   if (!fullName) {
     return res
