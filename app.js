@@ -30,7 +30,7 @@ app.get('/api/test', (req, res) => {
 });
 
 // Crear cuenta posible
-app.post("/create-account", async (req, res) => {
+app.post("/api/create-account", async (req, res) => {
   const { fullName, email, password } = req.body;
 
   if (!fullName) {
@@ -87,7 +87,7 @@ app.post("/create-account", async (req, res) => {
 });
 
 // Login
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -130,7 +130,7 @@ app.post("/login", async (req, res) => {
 });
 
 // Get user
-app.get("/get-user", authenticateToken, async (req, res) => {
+app.get("/api/get-user", authenticateToken, async (req, res) => {
   const user = req.user;
   const userId = req.user.id;
   const isUser = await User.findOne({ _id: userId });
@@ -150,7 +150,7 @@ app.get("/get-user", authenticateToken, async (req, res) => {
 });
 
 // Add Koto
-app.post("/add-koto", authenticateToken, async (req, res) => {
+app.post("/api/add-koto", authenticateToken, async (req, res) => {
   const { kotoba, tags, lectura, frase, español, ingles } = req.body;
 
   // Verificación separada para cada campo
@@ -202,7 +202,7 @@ app.post("/add-koto", authenticateToken, async (req, res) => {
 });
 
 // Edit Koto
-app.put("/edit-koto/:id", authenticateToken, async (req, res) => {
+app.put("/api/edit-koto/:id", authenticateToken, async (req, res) => {
   const { kotoba, tags, lectura, frase, español, ingles, isPinned } = req.body;
   const { id } = req.params; // Obtener el ID del Koto a editar
 
@@ -266,7 +266,7 @@ app.put("/edit-koto/:id", authenticateToken, async (req, res) => {
   }
 });
 //Get All Notes
-app.get("/get-all-kotos/", authenticateToken, async (req, res) => {
+app.get("/api/get-all-kotos/", authenticateToken, async (req, res) => {
   const user = req.user; // Se asume que `req.user` está definido por el middleware de autenticación
 
   try {
@@ -289,7 +289,7 @@ app.get("/get-all-kotos/", authenticateToken, async (req, res) => {
 });
 
 //Delete koto
-app.delete("/delete-koto/:kotoId", authenticateToken, async (req, res) => {
+app.delete("/api/delete-koto/:kotoId", authenticateToken, async (req, res) => {
   const kotoId = req.params.kotoId;
   const user = req.user;
   const userId = req.user.id;
@@ -318,7 +318,7 @@ app.delete("/delete-koto/:kotoId", authenticateToken, async (req, res) => {
 
 //Pin act
 
-app.put("/update-koto-pinned/:kotoId", authenticateToken, async (req, res) => {
+app.put("/api/update-koto-pinned/:kotoId", authenticateToken, async (req, res) => {
   const kotoId = req.params.kotoId;
   const isPinned = req.body.isPinned;
   const user = req.user;
