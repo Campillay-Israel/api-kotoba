@@ -4,19 +4,28 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 
 const User = require("./models/user.model");
 const Koto = require("./models/kotoba.model");
 const { authenticateToken } = require("./utilities");
 
-mongoose.connect(process.env.MONGO_URI, {});
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 app.use(cors({ origin: "*" }));
 app.use(express.json()); // Middleware para parsear JSON
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => console.log('MongoDB conectado'))
+.catch(err => console.log(err));
 
 // Ruta de prueba
-app.get("/test", (req, res) => {
+app.get('/api/test', (req, res) => {
   res.json({ data: "hola" });
 });
 
