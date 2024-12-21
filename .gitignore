@@ -1,3 +1,32 @@
-node_modules
+# Node.js modules
+node_modules/
+
+# Entornos de desarrollo
 .env
+
+# Archivos de configuración sensibles
 config.json
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistemas de cache y archivos temporales
+*.cache
+.DS_Store
+
+# Directorios de construcción
+dist/
+build/
+
+# Dependencias específicas de IDEs/editores
+.vscode/
+.idea/
+
+# Archivos de salida de errores o diagnósticos
+*.log
+
+# Sistemas de control y otros
+.git/
+coverage/

@@ -340,8 +340,8 @@ app.put("/update-koto-pinned/:kotoId", authenticateToken, async (req, res) => {
     });
   }
 });
-app.listen(8000, () => {
-  console.log("Servidor escuchando en http://localhost:8000");
-});
+//app.listen(8000, () => {
+ // console.log("Servidor escuchando en http://localhost:8000");
+//});
 
 module.exports = app;
