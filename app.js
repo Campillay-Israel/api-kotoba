@@ -120,28 +120,25 @@ app.post("/login", async (req, res) => {
   });
 });
 
-
 // Get user
 app.get("/get-user", authenticateToken, async (req, res) => {
-const user = req.user;
-const userId = req.user.id;
-const isUser = await User.findOne({_id: userId});
-if (!isUser) {
-  return res.sendStatus(401);
-}
-return res.json({
-  user:{
-    fullName: isUser.fullName,
-    email: isUser.email,
-    _id: isUser._id,
-    createOn: isUser.createOn,
-  } ,
-    
-  message: "",
-});
+  const user = req.user;
+  const userId = req.user.id;
+  const isUser = await User.findOne({ _id: userId });
+  if (!isUser) {
+    return res.sendStatus(401);
+  }
+  return res.json({
+    user: {
+      fullName: isUser.fullName,
+      email: isUser.email,
+      _id: isUser._id,
+      createOn: isUser.createOn,
+    },
 
+    message: "",
+  });
 });
-
 
 // Add Koto
 app.post("/add-koto", authenticateToken, async (req, res) => {
@@ -314,11 +311,10 @@ app.delete("/delete-koto/:kotoId", authenticateToken, async (req, res) => {
 
 app.put("/update-koto-pinned/:kotoId", authenticateToken, async (req, res) => {
   const kotoId = req.params.kotoId;
-  const isPinned  = req.body.isPinned;
+  const isPinned = req.body.isPinned;
   const user = req.user;
   const logUserId = req.user.id;
   try {
-    
     const koto = await Koto.findOne({ _id: kotoId, userId: logUserId });
     if (!koto) {
       return res
@@ -341,7 +337,7 @@ app.put("/update-koto-pinned/:kotoId", authenticateToken, async (req, res) => {
   }
 });
 //app.listen(8000, () => {
- // console.log("Servidor escuchando en http://localhost:8000");
+//console.log("Servidor escuchando en http://localhost:8000");
 //});
 
 module.exports = app;
