@@ -4,7 +4,7 @@ node_modules/
 # Entornos de desarrollo
 .env
 
-# Archivos de configuración sensibles
+# Archivos de configuración se   nsibles 
 config.json
 
 # Logs
