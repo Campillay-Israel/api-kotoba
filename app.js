@@ -24,8 +24,6 @@ app.get("/", (req, res) => {
 app.post("/create-account", async (req, res) => {
   const { fullName, email, password } = req.body;
 
-
-
   if (!fullName) {
     return res
       .status(400)
@@ -122,6 +120,29 @@ app.post("/login", async (req, res) => {
   });
 });
 
+
+// Get user
+app.get("/get-user", authenticateToken, async (req, res) => {
+const user = req.user;
+const userId = req.user.id;
+const isUser = await User.findOne({_id: userId});
+if (!isUser) {
+  return res.sendStatus(401);
+}
+return res.json({
+  user:{
+    fullName: isUser.fullName,
+    email: isUser.email,
+    _id: isUser._id,
+    createOn: isUser.createOn,
+  } ,
+    
+  message: "",
+});
+
+});
+
+
 // Add Koto
 app.post("/add-koto", authenticateToken, async (req, res) => {
   const { kotoba, tags, lectura, frase, español, ingles } = req.body;
@@ -176,17 +197,15 @@ app.post("/add-koto", authenticateToken, async (req, res) => {
 
 // Edit Koto
 app.put("/edit-koto/:id", authenticateToken, async (req, res) => {
-  const { kotoba, tags, lectura, frase, español, ingles } = req.body;
+  const { kotoba, tags, lectura, frase, español, ingles, isPinned } = req.body;
   const { id } = req.params; // Obtener el ID del Koto a editar
 
   // Validación básica de campos requeridos
   if (!kotoba) {
-    return res
-      .status(400)
-      .json({
-        error: true,
-        message: "Se requiere al menos un kanji o palabra",
-      });
+    return res.status(400).json({
+      error: true,
+      message: "Se requiere al menos un kanji o palabra",
+    });
   }
 
   if (!frase) {
@@ -215,6 +234,7 @@ app.put("/edit-koto/:id", authenticateToken, async (req, res) => {
         frase,
         español: español || "", // Valor por defecto si está vacío
         ingles: ingles || "", // Valor por defecto si está vacío
+        isPinned: isPinned || false, // Valor por defecto si está vacío
       },
       { new: true, runValidators: true } // Retorna el objeto actualizado y aplica validaciones
     );
@@ -269,15 +289,15 @@ app.delete("/delete-koto/:kotoId", authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
   try {
-   const note = await Koto.findOne({ _id: kotoId, userId: userId });
-   console.log("probamnos",kotoId,userId,user) 
-   console.log(kotoId,userId,user) 
-   if (!note) {
-     return res
-     .status(404)
-     .json({ error: true, message: "Kotoba no encontrado" });
+    const note = await Koto.findOne({ _id: kotoId, userId: userId });
+    console.log("probamnos", kotoId, userId, user);
+    console.log(kotoId, userId, user);
+    if (!note) {
+      return res
+        .status(404)
+        .json({ error: true, message: "Kotoba no encontrado" });
     }
- await Koto.deleteOne({ _id: kotoId, userId: userId });
+    await Koto.deleteOne({ _id: kotoId, userId: userId });
     return res.json({
       error: false,
       message: "Kotoba eliminada correctamente",
@@ -290,6 +310,36 @@ app.delete("/delete-koto/:kotoId", authenticateToken, async (req, res) => {
   }
 });
 
+//Pin act
+
+app.put("/update-koto-pinned/:kotoId", authenticateToken, async (req, res) => {
+  const kotoId = req.params.kotoId;
+  const isPinned  = req.body.isPinned;
+  const user = req.user;
+  const logUserId = req.user.id;
+  try {
+    
+    const koto = await Koto.findOne({ _id: kotoId, userId: logUserId });
+    if (!koto) {
+      return res
+        .status(404)
+        .json({ error: true, message: "Koto no encontrado" });
+    }
+    koto.isPinned = isPinned;
+
+    await koto.save();
+    return res.json({
+      error: false,
+      koto,
+      message: "Koto actualizado exitosamente",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      message: "Error interno del servidor",
+    });
+  }
+});
 app.listen(8000, () => {
   console.log("Servidor escuchando en http://localhost:8000");
 });
