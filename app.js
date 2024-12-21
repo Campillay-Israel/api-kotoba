@@ -16,7 +16,7 @@ app.use(cors({ origin: "*" }));
 app.use(express.json()); // Middleware para parsear JSON
 
 // Ruta de prueba
-app.get("/", (req, res) => {
+app.get("/test", (req, res) => {
   res.json({ data: "hola" });
 });
 
