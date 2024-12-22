@@ -4,28 +4,28 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 
 dotenv.config();
-
 
 const User = require("./models/user.model");
 const Koto = require("./models/kotoba.model");
 const { authenticateToken } = require("./utilities");
 
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors({ origin: "*" }));
 app.use(express.json()); // Middleware para parsear JSON
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log('MongoDB conectado'))
-.catch(err => console.log(err));
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB conectado"))
+  .catch((err) => console.log(err));
 
 // Ruta de prueba
-app.get('/api/test', (req, res) => {
+app.get("/api/test", (req, res) => {
   res.json({ data: "hola" });
 });
 
@@ -318,33 +318,93 @@ app.delete("/api/delete-koto/:kotoId", authenticateToken, async (req, res) => {
 
 //Pin act
 
-app.put("/api/update-koto-pinned/:kotoId", authenticateToken, async (req, res) => {
-  const kotoId = req.params.kotoId;
-  const isPinned = req.body.isPinned;
-  const user = req.user;
-  const logUserId = req.user.id;
-  try {
-    const koto = await Koto.findOne({ _id: kotoId, userId: logUserId });
-    if (!koto) {
-      return res
-        .status(404)
-        .json({ error: true, message: "Koto no encontrado" });
-    }
-    koto.isPinned = isPinned;
+app.put(
+  "/api/update-koto-pinned/:kotoId",
+  authenticateToken,
+  async (req, res) => {
+    const kotoId = req.params.kotoId;
+    const isPinned = req.body.isPinned;
+    const user = req.user;
+    const logUserId = req.user.id;
+    try {
+      const koto = await Koto.findOne({ _id: kotoId, userId: logUserId });
+      if (!koto) {
+        return res
+          .status(404)
+          .json({ error: true, message: "Koto no encontrado" });
+      }
+      koto.isPinned = isPinned;
 
-    await koto.save();
+      await koto.save();
+      return res.json({
+        error: false,
+        koto,
+        message: "Koto actualizado exitosamente",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        error: true,
+        message: "Error interno del servidor",
+      });
+    }
+  }
+);
+
+// Search
+app.get("/api/search-kotos/", authenticateToken, async (req, res) => {
+  const  userID  = req.user.id;
+  const { query } = req.query;
+
+  if (!query) {
+    return res.status(400).json({
+      error: true,
+      message: "Search query is required",
+    });
+  }
+
+  try {
+    // Imprimir valores para depuración
+    console.log("Query recibido:", query);
+    console.log("User ID recibido:", userID);
+
+    const matchingKotos = await Koto.find({
+      userId: userID,
+      $or: [
+        { kotoba: { $regex: new RegExp(query.trim(), "i") } },
+        { lectura: { $regex: new RegExp(query.trim(), "i") } },
+        { frase: { $regex: new RegExp(query.trim(), "i") } },
+        { español: { $regex: new RegExp(query.trim(), "i") } },
+        { ingles: { $regex: new RegExp(query.trim(), "i") } },
+        { tags: { $elemMatch: { $regex: new RegExp(query.trim(), "i") } } },
+      ],
+    });
+
+    console.log("Resultados encontrados:", matchingKotos);
+
+    if (matchingKotos.length === 0) {
+      return res.json({
+        error: false,
+        count: 0,
+        kotobas: [],
+        message: "No se encontraron kotobas",
+      });
+    }
+
     return res.json({
       error: false,
-      koto,
-      message: "Koto actualizado exitosamente",
+      count: matchingKotos.length,
+      kotobas: matchingKotos,
+      message: "Kotobas encontradas",
     });
   } catch (error) {
+    console.error("Error en búsqueda de kotobas:", error);
     return res.status(500).json({
       error: true,
       message: "Error interno del servidor",
     });
   }
 });
+
 //app.listen(8000, () => {
 //console.log("Servidor escuchando en http://localhost:8000");
 //});
